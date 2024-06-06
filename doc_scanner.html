@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .scanner-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    .scanner-container h1 {
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input,
+    .form-group select {
+      width: calc(100% - 20px);
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #007BFF;
+      color: #fff;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #response_result,
+    #qr-reader-results {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f9f9f9;
+      margin-top: 10px;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="scanner-wrapper">
+    <div class="scanner-container">
+      <h1>Ticket Scanner</h1>
+      <div id="qr-reader" style="width: 100%;"></div>
+
+      <div class="form-group">
+        <label for="device_name">Device name</label>
+        <input type="text" id="device_name" placeholder="Enter device name">
+      </div>
+
+      <div class="form-group">
+        <label for="api_key">Api key</label>
+        <input type="text" id="api_key" value="4wxD6IHLq6InJk6EnwJqKcBk2OvIScowNbuI0dN6qhc98wGi9cbCnER5ZR1RUtT2" placeholder="Enter api key">
+      </div>
+
+      <div class="form-group">
+        <label for="environment">Environment</label>
+        <select id="environment">
+          <option selected="selected">development</option>
+          <option>integration</option>
+          <option>staging</option>
+          <option>production</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <h5>Detected QRCode:</h5>
+        <span id="qr-reader-results"></span>
+      </div>
+
+      <div class="form-group">
+        <h5>Response Data:</h5>
+        <span id="response_result"></span>
+      </div>
+
+      <button type="button" id="verify_button">Verify</button>
+      <button type="button" id="scan_button">Scan</button>
+    </div>
+  </div>
+  
+  <script>
+    function onScanSuccess(decodedText, decodedResult) {
+      document.getElementById('qr-reader-results').innerText = `${decodedText}`;
+    }
+
+    function onScanFailure(error) {
+      console.warn(`QR Code scan error: ${error}`);
+    }
+
+    var html5QrcodeScanner = new Html5QrcodeScanner(
+      "qr-reader", { fps: 10, qrbox: 250 });
+
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var verifyButton = document.getElementById('verify_button');
+      var scanButton = document.getElementById('scan_button');
+
+      verifyButton.addEventListener('click', function() {
+        fetch(`/external/api/v1/ticket/verify.json`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x_api_key': document.getElementById('api_key').value,
+          },
+          body: JSON.stringify({ qr_code: document.getElementById('qr-reader-results').innerText })
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('response_result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+      });
+
+      scanButton.addEventListener('click', function() {
+        fetch(`/external/api/v1/ticket/scan.json`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x_api_key': document.getElementById('api_key').value,
+          },
+          body: JSON.stringify({ qr_code: document.getElementById('qr-reader-results').innerText, device: document.getElementById('device_name').value })
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('response_result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+      });
+    });
+  </script>  
+</body>
+</html>
