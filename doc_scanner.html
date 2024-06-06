@@ -12,7 +12,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      /* height: 100vh; */
       margin: 0;
     }
     .scanner-container {
@@ -20,7 +20,7 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
+      /* max-width: 600px; */
       width: 100%;
       text-align: center;
     }
@@ -55,11 +55,12 @@
       background: #0056b3;
     }
 
-    #qr-reader-results {
+    #qr-reader-results,
+    #response_result {
       padding: 10px;
-      border: 1px solid #ddd;
+      /* border: 1px solid #ddd; */
       border-radius: 4px;
-      background: #f9f9f9;
+      /* background: #f9f9f9; */
       margin-top: 10px;
       text-align: left;
       white-space: pre-wrap;
@@ -67,44 +68,43 @@
   </style>
 </head>
 <body>
-  <div class="scanner-wrapper">
-    <div class="scanner-container">
-      <h1>Ticket Scanner</h1>
-      <div id="qr-reader" style="width: 100%;"></div>
+  
+  <div class="scanner-container">
+    <h1>Ticket Scanner</h1>
+    <div id="qr-reader" style="width: 100%;"></div>
 
-      <div class="form-group">
-        <label for="device_name">Device name</label>
-        <input type="text" id="device_name" placeholder="Enter device name">
-      </div>
-
-      <div class="form-group">
-        <label for="api_key">Api key</label>
-        <input type="text" id="api_key" value="" placeholder="Enter api key">
-      </div>
-
-      <div class="form-group">
-        <label for="environment">Environment</label>
-        <select id="environment">
-          <option selected="selected" value="http://localhost:3000">development</option>
-          <option value="https://integration.anyroad.com">integration</option>
-          <option value="https://staging.anyroad.com">staging</option>
-          <option value="https://app.anyroad.com">production</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <h5>Detected QRCode:</h5>
-        <span id="qr-reader-results"></span>
-      </div>
-
-      <div class="form-group">
-        <h5>Response Data:</h5>
-        <span id="response_result"></span>
-      </div>
-
-      <button type="button" id="verify_button">Verify</button>
-      <button type="button" id="scan_button">Scan</button>
+    <div class="form-group">
+      <label for="device_name">Device name</label>
+      <input type="text" id="device_name" placeholder="Enter device name">
     </div>
+
+    <div class="form-group">
+      <label for="api_key">Api key</label>
+      <input type="text" id="api_key" value="" placeholder="Enter api key">
+    </div>
+
+    <div class="form-group">
+      <label for="environment">Environment</label>
+      <select id="environment">
+        <option selected="selected" value="http://localhost:3000">development</option>
+        <option value="https://integration.anyroad.com">integration</option>
+        <option value="https://staging.anyroad.com">staging</option>
+        <option value="https://app.anyroad.com">production</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <h5>Detected QRCode:</h5>
+      <span id="qr-reader-results"></span>
+    </div>
+
+    <div class="form-group">
+      <h5>Response Data:</h5>
+      <span id="response_result"></span>
+    </div>
+
+    <button type="button" id="verify_button">Verify</button>
+    <button type="button" id="scan_button">Scan</button>
   </div>
   
   <script>
