@@ -54,7 +54,7 @@
     button:hover {
       background: #0056b3;
     }
-    #response_result,
+
     #qr-reader-results {
       padding: 10px;
       border: 1px solid #ddd;
@@ -79,16 +79,16 @@
 
       <div class="form-group">
         <label for="api_key">Api key</label>
-        <input type="text" id="api_key" value="4wxD6IHLq6InJk6EnwJqKcBk2OvIScowNbuI0dN6qhc98wGi9cbCnER5ZR1RUtT2" placeholder="Enter api key">
+        <input type="text" id="api_key" value="" placeholder="Enter api key">
       </div>
 
       <div class="form-group">
         <label for="environment">Environment</label>
         <select id="environment">
-          <option selected="selected">development</option>
-          <option>integration</option>
-          <option>staging</option>
-          <option>production</option>
+          <option selected="selected" value="http://localhost:3000">development</option>
+          <option value="https://integration.anyroad.com">integration</option>
+          <option value="https://staging.anyroad.com">staging</option>
+          <option value="https://app.anyroad.com">production</option>
         </select>
       </div>
 
@@ -113,7 +113,7 @@
     }
 
     function onScanFailure(error) {
-      console.warn(`QR Code scan error: ${error}`);
+      // console.warn(`QR Code scan error: ${error}`);
     }
 
     var html5QrcodeScanner = new Html5QrcodeScanner(
@@ -121,44 +121,37 @@
 
     html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
+    function postRequest(url, body) {
+      fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x_api_key': document.getElementById('api_key').value,
+          },
+          body: JSON.stringify(body)
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('response_result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       var verifyButton = document.getElementById('verify_button');
       var scanButton = document.getElementById('scan_button');
-
       verifyButton.addEventListener('click', function() {
-        fetch(`/external/api/v1/ticket/verify.json`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x_api_key': document.getElementById('api_key').value,
-          },
-          body: JSON.stringify({ qr_code: document.getElementById('qr-reader-results').innerText })
-        })
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('response_result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+        var selectedServer = document.getElementById('environment').value;
+        var body = { qr_code: document.getElementById('qr-reader-results').innerText }
+        postRequest(`${selectedServer}/external/api/v1/ticket/verify.json`, body)
       });
 
       scanButton.addEventListener('click', function() {
-        fetch(`/external/api/v1/ticket/scan.json`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x_api_key': document.getElementById('api_key').value,
-          },
-          body: JSON.stringify({ qr_code: document.getElementById('qr-reader-results').innerText, device: document.getElementById('device_name').value })
-        })
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('response_result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+        var selectedServer = document.getElementById('environment').value;
+        var body = { qr_code: document.getElementById('qr-reader-results').innerText, device: document.getElementById('device_name').value }
+        postRequest(`${selectedServer}/external/api/v1/ticket/scan.json`, body)
       });
     });
   </script>  
